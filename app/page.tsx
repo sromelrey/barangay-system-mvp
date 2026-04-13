@@ -1,65 +1,109 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Users, FileText, HeartHandshake, Scale, ArrowRight } from 'lucide-react';
 
 export default function Home() {
+  const modules = [
+    {
+      title: 'Residents',
+      description: 'Manage barangay resident records',
+      icon: Users,
+      route: '/residents',
+      color: 'text-blue-600',
+    },
+    {
+      title: 'Clearance',
+      description: 'Issue barangay certificates',
+      icon: FileText,
+      route: '/clearance',
+      color: 'text-green-600',
+    },
+    {
+      title: 'GAD Services',
+      description: 'Track beneficiaries and assistance',
+      icon: HeartHandshake,
+      route: '/gad',
+      color: 'text-purple-600',
+    },
+    {
+      title: 'Lupon',
+      description: 'Manage barangay dispute cases',
+      icon: Scale,
+      route: '/lupon',
+      color: 'text-orange-600',
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="container mx-auto max-w-6xl p-6">
+      {/* Header Section */}
+      <div className="mb-8 space-y-2">
+        <h1 className="text-4xl font-bold tracking-tight">Barangay System</h1>
+        <p className="text-muted-foreground text-lg">
+          Manage residents, services, and barangay operations
+        </p>
+      </div>
+
+      {/* Summary Stats (Optional) */}
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card className="rounded-2xl border-muted shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Residents
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">0</div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl border-muted shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Clearances Issued
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">0</div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl border-muted shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Active Cases
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">0</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Module Portal Grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {modules.map((module) => {
+          const Icon = module.icon;
+          return (
+            <Link key={module.route} href={module.route}>
+              <Card className="h-full rounded-2xl border-muted shadow-sm transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer">
+                <CardHeader>
+                  <div className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-muted ${module.color}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <CardTitle className="text-xl">{module.title}</CardTitle>
+                  <CardDescription>{module.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="ghost" className="w-full gap-2 group">
+                    Open
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

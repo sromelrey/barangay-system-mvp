@@ -19,6 +19,7 @@ This document outlines the implementation plan for a simplified Barangay Managem
 1. **Residents Management** - Basic resident registration and listing
 2. **Clearance & Certifications** - Issuance of barangay clearances and certificates
 3. **GAD / Social Services** - Management of beneficiaries and assistance programs
+4. **Lupon (Barangay Dispute)** - Basic case management and scheduling
 
 ### Excluded (Out of Scope)
 - Backend API / Database
@@ -60,6 +61,16 @@ Social services tracking for beneficiaries.
 - Assistance distribution tracking
 - Program participation history
 
+### 3.4 Lupon Module
+Barangay dispute resolution system (simplified MVP).
+
+**Key Functions:**
+- Case registration
+- Complainant/Respondent selection
+- Hearing scheduling
+- Status tracking
+- Case listing
+
 ---
 
 ## 4. Implementation Status Summary
@@ -69,6 +80,7 @@ Social services tracking for beneficiaries.
 | Residents | ☐ Not Started | 0% |
 | Clearance & Certifications | ☐ Not Started | 0% |
 | GAD / Social Services | ☐ Not Started | 0% |
+| Lupon | ☐ Not Started | 0% |
 | **Overall** | **☐ Not Started** | **0%** |
 
 ---
@@ -176,6 +188,43 @@ Social services tracking for beneficiaries.
 
 ---
 
+### 5.4 Lupon Module (MVP)
+
+#### Features Checklist
+- [ ] Create Case
+- [ ] Select Complainant from Residents
+- [ ] Select Respondent from Residents
+- [ ] Set Hearing Date
+- [ ] Update Case Status
+- [ ] List All Cases
+- [ ] View Case Details
+
+| Feature | Backend | Frontend | State | Status |
+|---------|---------|----------|-------|--------|
+| Create Case | None | Form Component | lupon store | ☐ Not Started |
+| Select Complainant | None | Dropdown Component | residents store | ☐ Not Started |
+| Select Respondent | None | Dropdown Component | residents store | ☐ Not Started |
+| Schedule Hearing | None | Date Picker | lupon store | ☐ Not Started |
+| Update Status | None | Dropdown Component | lupon store | ☐ Not Started |
+| List Cases | None | Table Component | lupon store | ☐ Not Started |
+| View Case Details | None | Detail Component | lupon store | ☐ Not Started |
+| Filter by Status | None | Filter Component | lupon store | ☐ Not Started |
+| localStorage Persistence | None | Middleware | lupon store | ☐ Not Started |
+
+**Case Data Fields:**
+- id (UUID)
+- title
+- complainantId (foreign key to residents)
+- respondentId (foreign key to residents)
+- description
+- hearingDate
+- status (Open/Ongoing/Settled/Unsettled)
+- notes (optional)
+- createdAt
+- updatedAt
+
+---
+
 ## 6. Folder Structure
 
 ```
@@ -214,6 +263,12 @@ src/
 │           ├── page.tsx
 │           └── new/
 │               └── page.tsx
+│   └── lupon/
+│       ├── page.tsx
+│       ├── new/
+│       │   └── page.tsx
+│       └── [id]/
+│           └── page.tsx
 ├── modules/
 │   ├── residents/
 │   │   ├── components/
@@ -236,11 +291,18 @@ src/
 │       │   ├── ProgramList.tsx
 │       │   └── DistributionForm.tsx
 │       └── types.ts
+│   └── lupon/
+│       ├── components/
+│       │   ├── CaseForm.tsx
+│       │   ├── CaseList.tsx
+│       │   └── CaseDetail.tsx
+│       └── types.ts
 ├── store/
 │   ├── index.ts
 │   ├── residentsStore.ts
 │   ├── clearancesStore.ts
-│   └── gadStore.ts
+│   ├── gadStore.ts
+│   └── luponStore.ts
 ├── components/
 │   ├── ui/
 │   │   ├── Button.tsx
@@ -257,7 +319,8 @@ src/
 │   ├── index.ts
 │   ├── resident.ts
 │   ├── clearance.ts
-│   └── gad.ts
+│   ├── gad.ts
+│   └── lupon.ts
 └── lib/
     ├── utils.ts
     └── constants.ts
@@ -561,6 +624,85 @@ export const useGadStore = create<GadStore>()(
 );
 ```
 
+### 7.4 Lupon Store
+
+```typescript
+// store/luponStore.ts
+type CaseStatus = 'Open' | 'Ongoing' | 'Settled' | 'Unsettled';
+
+interface Case {
+  id: string;
+  title: string;
+  complainantId: string;
+  respondentId: string;
+  description: string;
+  hearingDate?: string;
+  status: CaseStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface LuponStore {
+  cases: Case[];
+  addCase: (caseData: Omit<Case, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCase: (id: string, caseData: Partial<Case>) => void;
+  deleteCase: (id: string) => void;
+  getCase: (id: string) => Case | undefined;
+  updateStatus: (id: string, status: CaseStatus) => void;
+  getCasesByStatus: (status: CaseStatus) => Case[];
+  getCasesByResident: (residentId: string) => Case[];
+}
+
+export const useLuponStore = create<LuponStore>()(
+  persist(
+    (set, get) => ({
+      cases: [],
+      addCase: (caseData) => {
+        const newCase: Case = {
+          ...caseData,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        set((state) => ({ cases: [...state.cases, newCase] }));
+      },
+      updateCase: (id, caseData) => {
+        set((state) => ({
+          cases: state.cases.map((c) =>
+            c.id === id ? { ...c, ...caseData, updatedAt: new Date().toISOString() } : c
+          ),
+        }));
+      },
+      deleteCase: (id) => {
+        set((state) => ({
+          cases: state.cases.filter((c) => c.id !== id),
+        }));
+      },
+      getCase: (id) => {
+        return get().cases.find((c) => c.id === id);
+      },
+      updateStatus: (id, status) => {
+        set((state) => ({
+          cases: state.cases.map((c) =>
+            c.id === id ? { ...c, status, updatedAt: new Date().toISOString() } : c
+          ),
+        }));
+      },
+      getCasesByStatus: (status) => {
+        return get().cases.filter((c) => c.status === status);
+      },
+      getCasesByResident: (residentId) => {
+        return get().cases.filter(
+          (c) => c.complainantId === residentId || c.respondentId === residentId
+        );
+      },
+    }),
+    { name: 'barangay-lupon-storage' }
+  )
+);
+```
+
 ---
 
 ## 8. Page / Route Structure
@@ -583,6 +725,9 @@ export const useGadStore = create<GadStore>()(
 | `/gad/programs/[id]` | Program Detail | View/edit program |
 | `/gad/distributions` | Distributions List | Table of distributions |
 | `/gad/distributions/new` | New Distribution Form | Record distribution |
+| `/lupon` | Lupon Cases List | Table of all cases |
+| `/lupon/new` | New Case Form | Create case |
+| `/lupon/[id]` | Case Detail | View/update case |
 
 ---
 
@@ -622,7 +767,19 @@ export const useGadStore = create<GadStore>()(
 | Link to residents | ☐ Not Started | Select resident from dropdown |
 | Test document issuance | ☐ Not Started | Verify reference number generation |
 
-### Phase 4: GAD Module (Week 4)
+### Phase 4: Lupon Module (Week 4)
+| Task | Status | Notes |
+|------|--------|-------|
+| Create Lupon store | ☐ Not Started | Zustand with localStorage |
+| Create Lupon types | ☐ Not Started | TypeScript interfaces |
+| Build CaseForm component | ☐ Not Started | Create case form |
+| Build CaseList component | ☐ Not Started | Table with filters |
+| Build CaseDetail component | ☐ Not Started | View/update page |
+| Create Lupon pages | ☐ Not Started | Routes per section 8 |
+| Link to residents | ☐ Not Started | Select complainant/respondent |
+| Test case flows | ☐ Not Started | CRUD + status updates |
+
+### Phase 5: GAD Module (Week 5)
 | Task | Status | Notes |
 |------|--------|-------|
 | Create GAD store | ☐ Not Started | Zustand with localStorage |
@@ -636,7 +793,7 @@ export const useGadStore = create<GadStore>()(
 | Link beneficiaries to residents | ☐ Not Started | Select resident |
 | Test all GAD flows | ☐ Not Started | CRUD + linking |
 
-### Phase 5: Polish & Testing (Week 5)
+### Phase 6: Polish & Testing (Week 6)
 | Task | Status | Notes |
 |------|--------|-------|
 | Cross-module testing | ☐ Not Started | Resident → Clearance, Resident → GAD |
@@ -728,7 +885,17 @@ export const useGadStore = create<GadStore>()(
 - [ ] Test document issuance
 - [ ] Verify reference number generation
 
-### Phase 4: GAD Module
+### Phase 4: Lupon Module
+- [ ] Create Lupon store
+- [ ] Create Lupon types
+- [ ] Build CaseForm component
+- [ ] Build CaseList component
+- [ ] Build CaseDetail component
+- [ ] Create Lupon pages
+- [ ] Implement resident linking
+- [ ] Test case flows
+
+### Phase 5: GAD Module
 - [ ] Create GAD store
 - [ ] Create GAD types
 - [ ] Build BeneficiaryForm component
@@ -740,7 +907,7 @@ export const useGadStore = create<GadStore>()(
 - [ ] Implement resident linking
 - [ ] Test all GAD flows
 
-### Phase 5: Polish & Testing
+### Phase 6: Polish & Testing
 - [ ] Test cross-module linking
 - [ ] Verify UI consistency
 - [ ] Add error handling
@@ -767,6 +934,7 @@ Consider adding a seed function to populate localStorage with sample data for te
 - 5-10 sample beneficiaries
 - 3-5 sample programs
 - 10-15 sample distributions
+- 5-10 sample Lupon cases
 
 ### Future Enhancements (Post-MVP)
 These are NOT part of MVP but may be considered for Phase 2:
@@ -805,6 +973,6 @@ These are NOT part of MVP but may be considered for Phase 2:
 
 ---
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Last Updated:** 2026-04-13  
 **Status:** Ready for Implementation
