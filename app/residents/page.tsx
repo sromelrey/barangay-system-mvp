@@ -5,7 +5,7 @@ import { useResidentStore } from '@/store/resident.store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, ArrowLeft } from 'lucide-react';
 
 export default function ResidentsPage() {
   const residents = useResidentStore((state) => state.residents);
@@ -14,9 +14,16 @@ export default function ResidentsPage() {
     <div className="container mx-auto max-w-6xl p-6">
       {/* Page Header */}
       <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Residents</h1>
-          <p className="text-muted-foreground mt-1">Manage barangay residents</p>
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="gap-2">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Residents</h1>
+            <p className="text-muted-foreground mt-1">Manage barangay residents</p>
+          </div>
         </div>
         <Link href="/residents/new">
           <Button className="gap-2">
