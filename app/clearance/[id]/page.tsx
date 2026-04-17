@@ -15,10 +15,10 @@ export default function ClearanceViewPage() {
 
   // Barangay branding constants
   const barangayInfo = {
-    province: '[Province]',
-    municipality: '[Municipality]',
-    barangay: '[Barangay Name]',
-    captain: '[Barangay Captain Name]',
+    province: 'Cavite',
+    municipality: 'Dasmariñas',
+    barangay: 'Barangay 1',
+    captain: 'Juan Dela Cruz',
   };
 
   const clearance = clearances.find((c) => c.id === params.id);

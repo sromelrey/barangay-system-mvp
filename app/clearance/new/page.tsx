@@ -13,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { ArrowLeft, Camera, FileText } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
 
 export default function NewClearancePage() {
   const router = useRouter();

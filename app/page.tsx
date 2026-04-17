@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, FileText, HeartHandshake, Scale, ArrowRight } from 'lucide-react';
+import { Users, FileText, HeartHandshake, Scale, Building, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const modules = [
@@ -18,6 +18,13 @@ export default function Home() {
       icon: FileText,
       route: '/clearance',
       color: 'text-green-600',
+    },
+    {
+      title: 'Business Permit',
+      description: 'Issue business operation permits',
+      icon: Building,
+      route: '/business-permit',
+      color: 'text-amber-600',
     },
     {
       title: 'GAD Services',
@@ -80,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* Module Portal Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {modules.map((module) => {
           const Icon = module.icon;
           return (
